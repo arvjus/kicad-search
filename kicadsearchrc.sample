@@ -1,0 +1,12 @@
+# configuration file for kicadsearch
+# edit by your needs and copy to ~/.kicadsearchrc
+
+[default]
+# path to index directory
+indexdir = ./testdata/index
+
+[index]
+# colon-separated list of library directories
+librarydirs = ./testdata/library/*.lib
+
+[search]

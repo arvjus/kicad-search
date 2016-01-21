@@ -1,0 +1,32 @@
+#!/usr/bin/python
+
+from argparse import ArgumentParser, RawTextHelpFormatter
+from kicadsearch import KicadsrchConfig, KicadIndexer
+
+class IndexerArgumentParser(ArgumentParser):
+    """Freetext searching in KiCad EDA component libraries\nIndex KiCad library files"""
+
+    def __init__(self):
+        ArgumentParser.__init__(self, description=IndexerArgumentParser.__doc__, formatter_class=RawTextHelpFormatter)
+        self.add_argument('-I', '--create-index', dest='create_index', action='store_true', help='(re)create index')
+        self.add_argument('-R', '--reset-index', dest='reset_index', action='store_true', help='reset index')
+        self.add_argument('-C', '--dump-config', dest='dump_config', action='store_true', help='dump configuration options')
+        self.add_argument('-c', '--config', dest='config_file', metavar='file', help='alternative configuration file')
+
+if __name__ == '__main__':
+    argparser = IndexerArgumentParser()
+    args = argparser.parse_args()
+    try:
+        ki = KicadIndexer()
+        config = KicadsrchConfig(args.config_file)
+        if args.dump_config:
+            config.dump_items('default', 'index')
+        elif args.create_index:
+            ki.create_index(config.get('default', 'indexdir'), config.get('index', 'librarydirs').split(':'))
+        elif args.reset_index:
+            ki.create_index(config.get('default', 'indexdir'), [])
+        else:
+            argparser.print_help()
+    except Exception as e:
+        print ('Error:', e)
+

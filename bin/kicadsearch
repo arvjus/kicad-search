@@ -1,0 +1,46 @@
+#!/usr/bin/python
+
+import os, sys
+from argparse import ArgumentParser, RawTextHelpFormatter
+from kicadsearch import KicadsrchConfig, KicadSearcher
+
+class SearchArgumentParser(ArgumentParser):
+    """Freetext searching in KiCad EDA component libraries\nSearch in t[ype], n[ame](default), k[eyword], d[escr] fields"""
+
+    def __init__(self):
+        ArgumentParser.__init__(self, description=SearchArgumentParser.__doc__, formatter_class=RawTextHelpFormatter)
+        self.add_argument(dest='query', metavar='query', nargs='?')
+        self.add_argument('-I', '--index-info', dest='display_index_info', action='store_true', help='display index information')
+        self.add_argument('-L', '--list-all', dest='list_all', action='store_true', help='list all documents')
+        self.add_argument('-C', '--dump-config', dest='dump_config', action='store_true', help='dump configuration options')
+        self.add_argument('-c', '--config', dest='config_file', metavar='file', help='alternative configuration file')
+        self.add_argument('-p', '--print', dest='print_docs', action='store_true', help='print document content')
+        self.add_argument('-l', '--limit', dest='limit_hits', metavar='hits', help='limit number of hits')
+
+    def parse_args(self):
+        args = ArgumentParser.parse_args(self)
+        if not args.limit_hits: args.limit_hits=sys.maxsize
+        return args
+
+if __name__ == '__main__':
+    argparser = SearchArgumentParser()
+    args = argparser.parse_args()
+    try:
+        ks = None
+        config = KicadsrchConfig(args.config_file)
+        if args.dump_config:
+            config.dump_items('default', 'search')
+        else:
+            ks = KicadSearcher(config.get('default', 'indexdir'))
+            if args.display_index_info:
+                ks.print_index_statistics()
+            elif args.list_all:
+                ks.list_all(args.print_docs)
+            elif args.query:
+                ks.search(args.query, int(args.limit_hits), args.print_docs)
+            else:
+                argparser.print_help()
+    except Exception as e:
+        print ('Error:', e)
+    finally:
+        if ks: ks.close()
