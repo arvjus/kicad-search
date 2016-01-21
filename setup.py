@@ -5,7 +5,7 @@ setup(
     version='0.1.0',
     author='Arvid Juskaitis',
     author_email='arvydas.juskaitis@gmail.com',
-	 url='https://github.com/arvjus/kicad-search',
+    url='https://github.com/arvjus/kicad-search',
     packages=['kicadsearch',],
     license='LICENSE.txt',
     description='Freetext searching in KiCad EDA component libraries',
