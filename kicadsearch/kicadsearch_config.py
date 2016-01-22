@@ -8,9 +8,9 @@ class ConfigException(Exception):
     pass
 
 class KicadsrchConfig(ConfigParser):
-    def __init__(self, path = None):
+    def __init__(self, path = None, defaults={}):
         """import properties from config file or provide defaults"""
-        ConfigParser.__init__(self)
+        ConfigParser.__init__(self, defaults)
 
         if not path:
             path = os.environ["HOME"] + "/.kicadsearchrc"

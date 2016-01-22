@@ -1,3 +1,4 @@
+
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
@@ -8,8 +9,9 @@ class ParserException(Exception):
         Exception.__init__(self, 'Error: %s in %s:%d' % (msg, path, lineno))
 
 class LibFileParser(object):
-    def __init__(self, path):
+    def __init__(self, path, encoding):
         self.path = path
+        self.encoding = encoding
         self.position = 0
         self.lineno = 1
         self.md5sum = None
@@ -19,40 +21,44 @@ class LibFileParser(object):
     def parse(self):
         if not os.path.isfile(self.path): return None
 
-        with open(self.path, 'r') as f:
-            for line in iter(f.readline, ''):
-                if line.startswith('DEF'):
-                    m = re.match('DEF\s+(\S+)\s.*', line)
-                    if not m: raise ParserException('syntax error', self.path, self.lineno)
-                    self.item = {
-                        'names': m.group(1).lower(),
-                        'position': self.position,
-                        'lineno': self.lineno,
-                        'lines': 0,
+        with open(self.path, 'r', encoding=self.encoding) as f:
+            try:
+                for line in iter(f.readline, ''):
+                    if line.startswith('DEF'):
+                        m = re.match('DEF\s+(\S+)\s.*', line)
+                        if not m: raise ParserException('syntax error', self.path, self.lineno)
+                        self.item = {
+                            'names': m.group(1).lower(),
+                            'position': self.position,
+                            'lineno': self.lineno,
+                            'lines': 0,
                         }
-                    self.md5sum = hashlib.md5()
-                    self.parsing_item = True
+                        self.md5sum = hashlib.md5()
+                        self.parsing_item = True
 
-                elif line.startswith('ALIAS'):
-                    m = re.match('^ALIAS\s+(.*)$', line)
-                    self.item['names'] += ' ' + m.group(1).lower()
+                    elif line.startswith('ALIAS'):
+                        m = re.match('^ALIAS\s+(.*)$', line)
+                        self.item['names'] += ' ' + m.group(1).lower()
 
-                elif line.startswith('ENDDEF'):
-                    self.item['lines'] += 1
-                    self.md5sum.update(line.encode('utf-8'))
-                    self.item['md5sum'] = self.md5sum.hexdigest()
-                    self.parsing_item = False
-                    yield self.item
+                    elif line.startswith('ENDDEF'):
+                        self.item['lines'] += 1
+                        self.md5sum.update(line.encode(self.encoding))
+                        self.item['md5sum'] = self.md5sum.hexdigest()
+                        self.parsing_item = False
+                        yield self.item
 
-                self.position = f.tell()
-                self.lineno += 1
-                if self.parsing_item:
-                    self.item['lines'] += 1
-                    self.md5sum.update(line.encode('utf-8'))
+                    self.position = f.tell()
+                    self.lineno += 1
+                    if self.parsing_item:
+                        self.item['lines'] += 1
+                        self.md5sum.update(line.encode(self.encoding))
+            except Exception as ex:
+                print ('Error:', ex)
 
 class DcmFileParser(object):
-    def __init__(self, path):
+    def __init__(self, path, encoding):
         self.path = path
+        self.encoding = encoding
         self.position = 0
         self.lineno = 1
         self.parsing_item = False
@@ -61,55 +67,59 @@ class DcmFileParser(object):
     def parse(self):
         if not os.path.isfile(self.path): return None
 
-        with open(self.path, 'r') as f:
-            for line in iter(f.readline, ''):
-                if line.startswith('$CMP'):
-                    m = re.match('\$CMP\s+(\S+)\s+', line)
-                    if not m: raise ParserException('syntax error', self.path, self.lineno)
-                    self.item = {
-                        'name': m.group(1).lower(),
-                        'descr': None,
-                        'keyword': None,
-                        'datasheet': None,
-                        'position': self.position,
-                        'lineno': self.lineno,
-                        'lines': 0,
-                        }
-                    self.parsing_item = True
+        with open(self.path, 'r', encoding=self.encoding) as f:
+            try:
+                for line in iter(f.readline, ''):
+                    if line.startswith('$CMP'):
+                        m = re.match('\$CMP\s+(\S+)\s+', line)
+                        if not m: raise ParserException('syntax error', self.path, self.lineno)
+                        self.item = {
+                            'name': m.group(1).lower(),
+                            'descr': None,
+                            'keyword': None,
+                            'datasheet': None,
+                            'position': self.position,
+                            'lineno': self.lineno,
+                            'lines': 0,
+                            }
+                        self.parsing_item = True
 
-                elif line.startswith('D'):
-                    m = re.match('^D\s+(.*)$', line)
-                    self.item['descr'] = m.group(1).lower()
+                    elif line.startswith('D'):
+                        m = re.match('^D\s+(.*)$', line)
+                        self.item['descr'] = m.group(1).lower()
 
-                elif line.startswith('K'):
-                    m = re.match('^K\s+(.*)$', line)
-                    self.item['keyword'] = m.group(1).lower()
+                    elif line.startswith('K'):
+                        m = re.match('^K\s+(.*)$', line)
+                        self.item['keyword'] = m.group(1).lower()
 
-                elif line.startswith('F'):
-                    m = re.match('^F\s+(.*)$', line)
-                    self.item['datasheet'] = m.group(1).lower()
+                    elif line.startswith('F'):
+                        m = re.match('^F\s+(.*)$', line)
+                        self.item['datasheet'] = m.group(1).lower()
 
-                elif line.startswith('$ENDCMP'):
-                    self.item['lines'] += 1
-                    self.parsing_item = False
-                    yield self.item
+                    elif line.startswith('$ENDCMP'):
+                        self.item['lines'] += 1
+                        self.parsing_item = False
+                        yield self.item
 
-                self.position = f.tell()
-                self.lineno += 1
-                if self.parsing_item:
-                    self.item['lines'] += 1
+                    self.position = f.tell()
+                    self.lineno += 1
+                    if self.parsing_item:
+                        self.item['lines'] += 1
+            except Exception as ex:
+                print ('Error:', ex)
 
 class LibDocCreator(object):
-    def __init__(self, path):
+    def __init__(self, path, encoding):
         self.path = path
+        self.encoding = encoding
         self.path2 = os.path.splitext(path)[0]+'.dcm'
         self.dcm_items = {}
-        for item in DcmFileParser(self.path2).parse():
+        for item in DcmFileParser(self.path2, self.encoding).parse():
             name = item['name']
             self.dcm_items[name] = item
 
     def create(self):
-        for lib_item in LibFileParser(self.path).parse():
+        for lib_item in LibFileParser(self.path, self.encoding).parse():
             for name in lib_item['names'].split():
                 item = lib_item.copy()
                 item['id'] = '{}#{}'.format(self.path, name)
@@ -129,6 +139,6 @@ class LibDocCreator(object):
                 yield item
 
 if __name__ == '__main__':
-    for f in glob.glob(r'./data/library/*.lib'):
-        for doc in LibDocCreator(f).create():
+    for f in glob.glob(r'../testdata/library/*.lib'):
+        for doc in LibDocCreator(f, 'latin1').create():
             print ('doc:', doc)

@@ -10,7 +10,7 @@ class KicadIndexer(object):
     def __init__(self):
         pass
 
-    def create_index(self, indexdir, librarydirs):
+    def create_index(self, indexdir, librarydirs, encoding):
         if not os.path.exists(indexdir):
             os.mkdir(indexdir)
 
@@ -37,7 +37,7 @@ class KicadIndexer(object):
         for dir in librarydirs:
             for file in glob.glob(dir):
                 print (file)
-                for doc in LibDocCreator(file).create():
+                for doc in LibDocCreator(file, encoding).create():
                     writer.add_document(**doc)
         writer.commit()
         ix.close()

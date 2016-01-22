@@ -18,11 +18,11 @@ if __name__ == '__main__':
     args = argparser.parse_args()
     try:
         ki = KicadIndexer()
-        config = KicadsrchConfig(args.config_file)
+        config = KicadsrchConfig(args.config_file, {'encoding': 'latin1'})
         if args.dump_config:
             config.dump_items('default', 'index')
         elif args.create_index:
-            ki.create_index(config.get('default', 'indexdir'), config.get('index', 'librarydirs').split(':'))
+            ki.create_index(config.get('default', 'indexdir'), config.get('index', 'librarydirs').split(':'), config.get('index', 'encoding'))
         elif args.reset_index:
             ki.create_index(config.get('default', 'indexdir'), [])
         else:
