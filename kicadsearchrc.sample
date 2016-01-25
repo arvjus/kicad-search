@@ -6,6 +6,9 @@
 indexdir = ./testdata/index
 
 [index]
+# encoding in *.lib
+encoding = latin1
+
 # colon-separated list of library directories
 librarydirs = ./testdata/library/*.lib
 

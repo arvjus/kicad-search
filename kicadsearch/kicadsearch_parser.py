@@ -1,12 +1,16 @@
-
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import os, re, hashlib, glob
+import os
+import re
+import hashlib
+import glob
+
 
 class ParserException(Exception):
     def __init__(self, msg, path, lineno):
         Exception.__init__(self, 'Error: %s in %s:%d' % (msg, path, lineno))
+
 
 class LibFileParser(object):
     def __init__(self, path, encoding):
@@ -19,14 +23,16 @@ class LibFileParser(object):
         self.item = {}
 
     def parse(self):
-        if not os.path.isfile(self.path): return None
+        if not os.path.isfile(self.path):
+            return None
 
         with open(self.path, 'r', encoding=self.encoding) as f:
             try:
                 for line in iter(f.readline, ''):
                     if line.startswith('DEF'):
                         m = re.match('DEF\s+(\S+)\s.*', line)
-                        if not m: raise ParserException('syntax error', self.path, self.lineno)
+                        if not m:
+                            raise ParserException('syntax error', self.path, self.lineno)
                         self.item = {
                             'names': m.group(1).lower(),
                             'position': self.position,
@@ -53,7 +59,8 @@ class LibFileParser(object):
                         self.item['lines'] += 1
                         self.md5sum.update(line.encode(self.encoding))
             except Exception as ex:
-                print ('Error:', ex)
+                print('Error:', ex)
+
 
 class DcmFileParser(object):
     def __init__(self, path, encoding):
@@ -65,14 +72,16 @@ class DcmFileParser(object):
         self.item = {}
 
     def parse(self):
-        if not os.path.isfile(self.path): return None
+        if not os.path.isfile(self.path):
+            return None
 
         with open(self.path, 'r', encoding=self.encoding) as f:
             try:
                 for line in iter(f.readline, ''):
                     if line.startswith('$CMP'):
                         m = re.match('\$CMP\s+(\S+)\s+', line)
-                        if not m: raise ParserException('syntax error', self.path, self.lineno)
+                        if not m:
+                            raise ParserException('syntax error', self.path, self.lineno)
                         self.item = {
                             'name': m.group(1).lower(),
                             'descr': None,
@@ -81,7 +90,7 @@ class DcmFileParser(object):
                             'position': self.position,
                             'lineno': self.lineno,
                             'lines': 0,
-                            }
+                        }
                         self.parsing_item = True
 
                     elif line.startswith('D'):
@@ -106,13 +115,14 @@ class DcmFileParser(object):
                     if self.parsing_item:
                         self.item['lines'] += 1
             except Exception as ex:
-                print ('Error:', ex)
+                print('Error:', ex)
+
 
 class LibDocCreator(object):
     def __init__(self, path, encoding):
         self.path = path
         self.encoding = encoding
-        self.path2 = os.path.splitext(path)[0]+'.dcm'
+        self.path2 = os.path.splitext(path)[0] + '.dcm'
         self.dcm_items = {}
         for item in DcmFileParser(self.path2, self.encoding).parse():
             name = item['name']
@@ -138,7 +148,8 @@ class LibDocCreator(object):
                     item['lines2'] = dcm_item['lines']
                 yield item
 
+
 if __name__ == '__main__':
     for f in glob.glob(r'../testdata/library/*.lib'):
         for doc in LibDocCreator(f, 'latin1').create():
-            print ('doc:', doc)
+            print('doc:', doc)

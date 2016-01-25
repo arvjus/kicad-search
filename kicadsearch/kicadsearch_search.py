@@ -2,8 +2,9 @@
 
 import sys
 from whoosh import index
-from whoosh.query import *
+from whoosh.query import Every
 from whoosh.qparser import QueryParser, FieldAliasPlugin
+
 
 class KicadSearcher(object):
     def __init__(self, indexdir):
@@ -24,7 +25,10 @@ class KicadSearcher(object):
 
     def search(self, query, limit, print_docs):
         parser = QueryParser('name', self.ix.schema)
-        parser.add_plugin(FieldAliasPlugin({'type':'t', 'name': 'n', 'keyword': 'k', 'descr': 'd'}))
+        parser.add_plugin(FieldAliasPlugin({'type': 't',
+                                            'name': 'n',
+                                            'keyword': 'k',
+                                            'descr': 'd'}))
         print_hit = self.print_doc if print_docs else self.print_meta
         for hit in self.searcher.search(parser.parse(query), limit=limit):
             print_hit(hit)
@@ -36,31 +40,34 @@ class KicadSearcher(object):
 
     def print_meta(self, doc):
         keys = doc.keys()
-        print ('type:      {}'.format(doc['type']))
-        print ('name:      {}'.format(doc['name']))
+        print('type:      {}'.format(doc['type']))
+        print('name:      {}'.format(doc['name']))
         if 'descr' in keys:
-            print ('descr:     {}'.format(doc['descr']))
+            print('descr:     {}'.format(doc['descr']))
         if 'keyword' in keys:
-            print ('keyword:   {}'.format(doc['keyword']))
+            print('keyword:   {}'.format(doc['keyword']))
         if 'datasheet' in keys:
-            print ('datasheet: {}'.format(doc['datasheet']))
-        print ('location:  {}:{}-{}'.format(doc['path'], doc['lineno'], doc['lineno']+doc['lines']-1))
+            print('datasheet: {}'.format(doc['datasheet']))
+        print('location:  {}:{}-{}'.format(doc['path'], doc['lineno'], doc[
+            'lineno'] + doc['lines'] - 1))
         if 'path2' in keys:
-            print ('location:  {}:{}-{}'.format(doc['path2'], doc['lineno2'], doc['lineno2']+doc['lines2']-1))
-        print ('md5sum:    {}'.format(doc['md5sum']))
-        print ()
+            print('location:  {}:{}-{}'.format(doc['path2'], doc[
+                'lineno2'], doc['lineno2'] + doc['lines2'] - 1))
+        print('md5sum:    {}'.format(doc['md5sum']))
+        print()
 
     def print_doc(self, doc):
         def dump_doc(path, position, lines):
             try:
                 with open(path, 'r') as f:
                     f.seek(position)
-                    for n in xrange(lines):
+                    for n in range(lines):
                         print(f.readline(), end="", flush=True)
             except FileNotFoundError:
-                print ('reading error or file {} is no longer available'.format(path))
+                print('reading error or file {} is no longer available'.format(path))
             finally:
                 print()
+
         dump_doc(doc['path'], doc['position'], doc['lines'])
         if 'path2' in doc.keys():
             dump_doc(doc['path2'], doc['position2'], doc['lines2'])

@@ -2,13 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import os
-from configparser import ConfigParser, NoSectionError
+from configparser import ConfigParser
+
 
 class ConfigException(Exception):
     pass
 
+
 class KicadsrchConfig(ConfigParser):
-    def __init__(self, path = None, defaults={}):
+
+    def __init__(self, path=None, defaults={}):
         """import properties from config file or provide defaults"""
         ConfigParser.__init__(self, defaults)
 
@@ -24,6 +27,7 @@ class KicadsrchConfig(ConfigParser):
             print('section {}:'.format(sec))
             for kv in self.items(sec):
                 print('  {} = {}'.format(*kv))
+
 
 if __name__ == '__main__':
     config = KicadsrchConfig(None)
