@@ -34,16 +34,21 @@ Search in t[ype], n[ame](default), k[eyword], d[escr] fields"""
                           dest='config_file',
                           metavar='file',
                           help='alternative configuration file')
-        self.add_argument('-p',
-                          '--print',
-                          dest='print_docs',
-                          action='store_true',
-                          help='print document content')
         self.add_argument('-l',
                           '--limit',
                           dest='limit_hits',
                           metavar='hits',
                           help='limit number of hits')
+        self.add_argument('-a',
+                          '--any-match',
+                          dest='any_match',
+                          action='store_true',
+                          help='match any value in name, keyword, descr fields')
+        self.add_argument('-p',
+                          '--print',
+                          dest='print_docs',
+                          action='store_true',
+                          help='print document content')
 
     def parse_args(self):
         args = ArgumentParser.parse_args(self)
@@ -66,7 +71,7 @@ if __name__ == '__main__':
             elif args.list_all:
                 ks.list_all(args.print_docs)
             elif args.query:
-                ks.search(args.query, int(args.limit_hits), args.print_docs)
+                ks.search(args.query, int(args.limit_hits), args.any_match, args.print_docs)
             else:
                 argparser.print_help()
     except Exception as e:

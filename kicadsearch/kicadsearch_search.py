@@ -3,10 +3,11 @@
 import sys
 from whoosh import index
 from whoosh.query import Every
-from whoosh.qparser import QueryParser, FieldAliasPlugin
+from whoosh.qparser import QueryParser, MultifieldParser, FieldAliasPlugin, OrGroup
 
 
 class KicadSearcher(object):
+
     def __init__(self, indexdir):
         self.indexdir = indexdir
         self.ix = index.open_dir(self.indexdir)
@@ -23,8 +24,12 @@ class KicadSearcher(object):
         print('terms:       path2, position2, lineno2, lines2')
         print()
 
-    def search(self, query, limit, print_docs):
-        parser = QueryParser('name', self.ix.schema)
+    def search(self, query, limit, any_match, print_docs):
+        if any_match:
+            parser = MultifieldParser(
+                ['name', 'keyword', 'descr'], self.ix.schema, group=OrGroup)
+        else:
+            parser = QueryParser('name', self.ix.schema)
         parser.add_plugin(FieldAliasPlugin({'type': 't',
                                             'name': 'n',
                                             'keyword': 'k',
