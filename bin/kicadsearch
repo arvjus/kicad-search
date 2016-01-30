@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
@@ -55,6 +56,7 @@ Search in t[ype], n[ame](default), k[eyword], d[escr] fields"""
         if not args.limit_hits:
             args.limit_hits = sys.maxsize
         return args
+
 
 if __name__ == '__main__':
     argparser = SearchArgumentParser()

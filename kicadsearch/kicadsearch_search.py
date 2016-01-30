@@ -19,7 +19,7 @@ class KicadSearcher(object):
     def print_index_statistics(self):
         print('location:   ', self.indexdir)
         print('num of docs:', self.searcher.doc_count())
-        print('terms:       id, type,  name, descr, keyword, datasheet, md5sum')
+        print('terms:       id, type,  name, descr, keyword, reference, md5sum')
         print('terms:       path, position, lineno, lines')
         print('terms:       path2, position2, lineno2, lines2')
         print()
@@ -51,8 +51,8 @@ class KicadSearcher(object):
             print('descr:     {}'.format(doc['descr']))
         if 'keyword' in keys:
             print('keyword:   {}'.format(doc['keyword']))
-        if 'datasheet' in keys:
-            print('datasheet: {}'.format(doc['datasheet']))
+        if 'reference' in keys:
+            print('reference: {}'.format(doc['reference']))
         print('location:  {}:{}-{}'.format(doc['path'], doc['lineno'], doc[
             'lineno'] + doc['lines'] - 1))
         if 'path2' in keys:

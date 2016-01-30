@@ -1,9 +1,11 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 from argparse import ArgumentParser, RawTextHelpFormatter
 from kicadsearch import KicadsrchConfig, KicadIndexer
 
 
+##
 class IndexerArgumentParser(ArgumentParser):
     """Freetext searching in KiCad EDA component libraries\nIndex KiCad library files"""
 
@@ -31,6 +33,7 @@ if __name__ == '__main__':
             ki.create_index(
                 config.get('default', 'indexdir'),
                 config.get('index', 'librarydirs').split(':'),
+                config.get('index', 'moduledirs').split(':'),
                 config.get('index', 'encoding'))
         elif args.reset_index:
             ki.create_index(config.get('default', 'indexdir'), [])

@@ -12,4 +12,7 @@ encoding = latin1
 # colon-separated list of library directories
 librarydirs = ./testdata/library/*.lib
 
+# colon-separated list of module directories
+moduledirs = ./testdata/library/*.mod
+
 [search]

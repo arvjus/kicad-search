@@ -6,14 +6,14 @@ import glob
 from whoosh import index
 from whoosh.fields import Schema, ID, TEXT, NUMERIC
 from whoosh.analysis import StemmingAnalyzer
-from .kicadsearch_parser import LibDocCreator
+from .kicadsearch_parser import LibDocCreator, ModDocCreator
 
 
 class KicadIndexer(object):
     def __init__(self):
         pass
 
-    def create_index(self, indexdir, librarydirs, encoding):
+    def create_index(self, indexdir, librarydirs, moduledirs, encoding):
         if not os.path.exists(indexdir):
             os.mkdir(indexdir)
 
@@ -22,7 +22,7 @@ class KicadIndexer(object):
                         name=TEXT(stored=True),
                         descr=TEXT(stored=True, analyzer=StemmingAnalyzer()),
                         keyword=TEXT(stored=True, analyzer=StemmingAnalyzer()),
-                        datasheet=TEXT(stored=True),
+                        reference=TEXT(stored=True),
                         md5sum=TEXT(stored=True),
                         path=TEXT(stored=True),
                         position=NUMERIC(stored=True),
@@ -39,6 +39,11 @@ class KicadIndexer(object):
             for file in glob.glob(dir):
                 print(file)
                 for doc in LibDocCreator(file, encoding).create():
+                    writer.add_document(**doc)
+        for dir in moduledirs:
+            for file in glob.glob(dir):
+                print(file)
+                for doc in ModDocCreator(file, encoding).create():
                     writer.add_document(**doc)
         writer.commit()
         ix.close()

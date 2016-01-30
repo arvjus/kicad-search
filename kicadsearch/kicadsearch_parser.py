@@ -8,11 +8,16 @@ import glob
 
 
 class ParserException(Exception):
+
     def __init__(self, msg, path, lineno):
         Exception.__init__(self, 'Error: %s in %s:%d' % (msg, path, lineno))
 
 
+###############################################################################
+# Symbol library
+###############################################################################
 class LibFileParser(object):
+
     def __init__(self, path, encoding):
         self.path = path
         self.encoding = encoding
@@ -32,7 +37,8 @@ class LibFileParser(object):
                     if line.startswith('DEF'):
                         m = re.match('DEF\s+(\S+)\s.*', line)
                         if not m:
-                            raise ParserException('syntax error', self.path, self.lineno)
+                            raise ParserException(
+                                'syntax error', self.path, self.lineno)
                         self.item = {
                             'names': m.group(1).lower(),
                             'position': self.position,
@@ -44,7 +50,8 @@ class LibFileParser(object):
 
                     elif line.startswith('ALIAS'):
                         m = re.match('^ALIAS\s+(.*)$', line)
-                        self.item['names'] += ' ' + m.group(1).lower()
+                        if m:
+                            self.item['names'] += ' ' + m.group(1).lower()
 
                     elif line.startswith('ENDDEF'):
                         self.item['lines'] += 1
@@ -63,6 +70,7 @@ class LibFileParser(object):
 
 
 class DcmFileParser(object):
+
     def __init__(self, path, encoding):
         self.path = path
         self.encoding = encoding
@@ -81,12 +89,13 @@ class DcmFileParser(object):
                     if line.startswith('$CMP'):
                         m = re.match('\$CMP\s+(\S+)\s+', line)
                         if not m:
-                            raise ParserException('syntax error', self.path, self.lineno)
+                            raise ParserException(
+                                'syntax error', self.path, self.lineno)
                         self.item = {
                             'name': m.group(1).lower(),
                             'descr': None,
                             'keyword': None,
-                            'datasheet': None,
+                            'reference': None,
                             'position': self.position,
                             'lineno': self.lineno,
                             'lines': 0,
@@ -95,15 +104,18 @@ class DcmFileParser(object):
 
                     elif line.startswith('D'):
                         m = re.match('^D\s+(.*)$', line)
-                        self.item['descr'] = m.group(1).lower()
+                        if m:
+                            self.item['descr'] = m.group(1).lower()
 
                     elif line.startswith('K'):
                         m = re.match('^K\s+(.*)$', line)
-                        self.item['keyword'] = m.group(1).lower()
+                        if m:
+                            self.item['keyword'] = m.group(1).lower()
 
                     elif line.startswith('F'):
                         m = re.match('^F\s+(.*)$', line)
-                        self.item['datasheet'] = m.group(1).lower()
+                        if m:
+                            self.item['reference'] = m.group(1).lower()
 
                     elif line.startswith('$ENDCMP'):
                         self.item['lines'] += 1
@@ -119,6 +131,7 @@ class DcmFileParser(object):
 
 
 class LibDocCreator(object):
+
     def __init__(self, path, encoding):
         self.path = path
         self.encoding = encoding
@@ -141,7 +154,7 @@ class LibDocCreator(object):
                     dcm_item = self.dcm_items[name]
                     item['descr'] = dcm_item['descr']
                     item['keyword'] = dcm_item['keyword']
-                    item['datasheet'] = dcm_item['datasheet']
+                    item['reference'] = dcm_item['reference']
                     item['path2'] = self.path2
                     item['position2'] = dcm_item['position']
                     item['lineno2'] = dcm_item['lineno']
@@ -149,7 +162,95 @@ class LibDocCreator(object):
                 yield item
 
 
+###############################################################################
+# Footprint library
+###############################################################################
+class ModFileParser(object):
+
+    def __init__(self, path, encoding):
+        self.path = path
+        self.encoding = encoding
+        self.position = 0
+        self.lineno = 1
+        self.md5sum = None
+        self.parsing_item = False
+        self.item = {}
+
+    def parse(self):
+        if not os.path.isfile(self.path):
+            return None
+
+        with open(self.path, 'r', encoding=self.encoding) as f:
+            try:
+                for line in iter(f.readline, ''):
+                    if line.startswith('$MODULE'):
+                        m = re.match('\$MODULE\s+(\S+)\s.*', line)
+                        if not m:
+                            raise ParserException(
+                                'syntax error', self.path, self.lineno)
+                        self.item = {
+                            'names': m.group(1).lower(),
+                            'position': self.position,
+                            'lineno': self.lineno,
+                            'lines': 0,
+                        }
+                        self.md5sum = hashlib.md5()
+                        self.parsing_item = True
+
+                    elif line.startswith('Cd'):
+                        m = re.match('^Cd\s+(.*)$', line)
+                        if m:
+                            self.item['descr'] = m.group(1).lower()
+
+                    elif line.startswith('K'):
+                        m = re.match('^Kw\s+(.*)$', line)
+                        if m:
+                            self.item['keyword'] = m.group(1).lower()
+
+                    elif line.startswith('AR'):
+                        m = re.match('^AR\s+(.*)$', line)
+                        if m:
+                            self.item['reference'] = m.group(1).lower()
+
+                    elif line.startswith('$EndMODULE'):
+                        self.item['lines'] += 1
+                        self.md5sum.update(line.encode(self.encoding))
+                        self.item['md5sum'] = self.md5sum.hexdigest()
+                        self.parsing_item = False
+                        yield self.item
+
+                    self.position = f.tell()
+                    self.lineno += 1
+                    if self.parsing_item:
+                        self.item['lines'] += 1
+                        self.md5sum.update(line.encode(self.encoding))
+            except Exception as ex:
+                print('Error:', ex)
+
+
+class ModDocCreator(object):
+
+    def __init__(self, path, encoding):
+        self.path = path
+        self.encoding = encoding
+
+    def create(self):
+        for lib_item in ModFileParser(self.path, self.encoding).parse():
+            for name in lib_item['names'].split():
+                item = lib_item.copy()
+                item['id'] = '{}#{}'.format(self.path, name)
+                item['type'] = 'MOD'
+                item['path'] = self.path
+                item['name'] = name
+                del item['names']
+                yield item
+
+
 if __name__ == '__main__':
-    for f in glob.glob(r'../testdata/library/*.lib'):
-        for doc in LibDocCreator(f, 'latin1').create():
+    for f in glob.glob(r'../testdata/library/*.mod'):
+        for doc in ModDocCreator(f, 'latin1').create():
             print('doc:', doc)
+
+    # for f in glob.glob(r'../testdata/library/*.mod'):
+    #     for doc in ModFileParser(f, 'latin1').parse():
+    #         print('doc:', doc)
