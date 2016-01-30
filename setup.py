@@ -3,7 +3,7 @@
 from setuptools import setup
 
 setup(name='KicadSearch',
-      version='0.1.1',
+      version='0.2.0',
       author='Arvid Juskaitis',
       author_email='arvydas.juskaitis@gmail.com',
       url='https://github.com/arvjus/kicad-search',

@@ -2,7 +2,7 @@
 
 import sys
 from whoosh import index
-from whoosh.query import Every
+from whoosh.query import Every, And, Term
 from whoosh.qparser import QueryParser, MultifieldParser, FieldAliasPlugin, OrGroup
 
 
@@ -24,7 +24,7 @@ class KicadSearcher(object):
         print('terms:       path2, position2, lineno2, lines2')
         print()
 
-    def search(self, query, limit, any_match, print_docs):
+    def search(self, query, limit, any_match, search_type, print_docs):
         if any_match:
             parser = MultifieldParser(
                 ['name', 'keyword', 'descr'], self.ix.schema, group=OrGroup)
@@ -35,7 +35,10 @@ class KicadSearcher(object):
                                             'keyword': 'k',
                                             'descr': 'd'}))
         print_hit = self.print_doc if print_docs else self.print_meta
-        for hit in self.searcher.search(parser.parse(query), limit=limit):
+        query = parser.parse(query)
+        if search_type:
+            query = parser.parse('type:{}'.format(search_type)) & query
+        for hit in self.searcher.search(query, limit=limit):
             print_hit(hit)
 
     def list_all(self, print_docs):

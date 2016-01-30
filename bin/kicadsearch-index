@@ -5,7 +5,6 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 from kicadsearch import KicadsrchConfig, KicadIndexer
 
 
-##
 class IndexerArgumentParser(ArgumentParser):
     """Freetext searching in KiCad EDA component libraries\nIndex KiCad library files"""
 

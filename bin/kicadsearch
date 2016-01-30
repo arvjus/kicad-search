@@ -15,11 +15,11 @@ Search in t[ype], n[ame](default), k[eyword], d[escr] fields"""
                                 description=SearchArgumentParser.__doc__,
                                 formatter_class=RawTextHelpFormatter)
         self.add_argument(dest='query', metavar='query', nargs='?')
-        self.add_argument('-I',
-                          '--index-info',
-                          dest='display_index_info',
+        self.add_argument('-P',
+                          '--print-index-info',
+                          dest='print_index_info',
                           action='store_true',
-                          help='display index information')
+                          help='print index information')
         self.add_argument('-L',
                           '--list-all',
                           dest='list_all',
@@ -45,11 +45,16 @@ Search in t[ype], n[ame](default), k[eyword], d[escr] fields"""
                           dest='any_match',
                           action='store_true',
                           help='match any value in name, keyword, descr fields')
-        self.add_argument('-p',
-                          '--print',
-                          dest='print_docs',
+        self.add_argument('-t',
+                          '--type',
+                          dest='search_type',
+                          choices=['lib', 'mod'],
+                          help='restrict search by a given type')
+        self.add_argument('-d',
+                          '--dump',
+                          dest='dump_content',
                           action='store_true',
-                          help='print document content')
+                          help='dump document content')
 
     def parse_args(self):
         args = ArgumentParser.parse_args(self)
@@ -68,12 +73,16 @@ if __name__ == '__main__':
             config.dump_items('default', 'search')
         else:
             ks = KicadSearcher(config.get('default', 'indexdir'))
-            if args.display_index_info:
+            if args.print_index_info:
                 ks.print_index_statistics()
             elif args.list_all:
-                ks.list_all(args.print_docs)
+                ks.list_all(args.dump_content)
             elif args.query:
-                ks.search(args.query, int(args.limit_hits), args.any_match, args.print_docs)
+                ks.search(args.query,
+                          int(args.limit_hits),
+                          args.any_match,
+                          args.search_type,
+                          args.dump_content)
             else:
                 argparser.print_help()
     except Exception as e:
@@ -82,6 +91,3 @@ if __name__ == '__main__':
         if ks:
             ks.close()
 
-
-def test():
-    pass

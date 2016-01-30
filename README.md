@@ -16,8 +16,8 @@ features:
 Development status
 ------------------------
 
-Currently only schematic part library (*.lib, *.dcm) format is supported.
-Support for module libraries (*.mod, *.kicad_mod) is under development.
+Currently only schematic part library (*.lib, *.dcm) and 'legacy' module (*.mod) format are
+supported. Support for module libraries (*.kicad_mod) is under development.
 
 
 Quick Start
@@ -47,9 +47,9 @@ Index libraries:
 
 > $ kicadsearch-index -I
 
-Check index:
+Print index info:
 
-> $ kicadsearch -I
+> $ kicadsearch -P
 
 
 Searching
@@ -66,6 +66,14 @@ Search by name on any of two components:
 
 > $ kicadsearch '74ls688 OR 74ls689'
 
+Search any of two components in any of field:
+
+> $ kicadsearch -a '74ls688 74ls689'
+
+Search only within a given type:
+
+> $ kicadsearch -t lib -a '74ls688 74ls689'
+
 Search by name and keyword:
 
 > $ kicadsearch 'n:zener* AND k:diode'
@@ -74,12 +82,11 @@ Slightly more advanced search:
 
 > $ kicadsearch 'k:arm AND (d:i2c OR d:spi)'
 
-Print content of library component:
+Dump content of library component:
 
-> $ kicadsearch '74ls688' -p
+> $ kicadsearch '74ls688' -d
 
 List all documents:
 
 > $ kicadsearch -L
-
 
