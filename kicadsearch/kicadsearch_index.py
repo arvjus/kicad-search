@@ -2,11 +2,19 @@
 
 import os
 import os.path
-import glob
 from whoosh import index
 from whoosh.fields import Schema, ID, TEXT, NUMERIC
 from whoosh.analysis import StemmingAnalyzer
-from .kicadsearch_parser import LibDocCreator, ModDocCreator
+from .kicadsearch_parser import LibDocCreator, ModDocCreator, KicadModDocCreator
+
+
+def list_files(rootdirs, sufix):
+    for rootdir in rootdirs:
+        for root, dirs, files in os.walk(rootdir):
+            for path in [root + os.path.sep + file for file in files
+                         if file.lower().endswith(sufix)]:
+                print(path)
+                yield path
 
 
 class KicadIndexer(object):
@@ -35,15 +43,18 @@ class KicadIndexer(object):
 
         ix = index.create_in(indexdir, schema)
         writer = ix.writer()
-        for dir in librarydirs:
-            for file in glob.glob(dir):
-                print(file)
-                for doc in LibDocCreator(file, encoding).create():
-                    writer.add_document(**doc)
-        for dir in moduledirs:
-            for file in glob.glob(dir):
-                print(file)
-                for doc in ModDocCreator(file, encoding).create():
-                    writer.add_document(**doc)
+
+        for path in list_files(librarydirs, '.lib'):
+            for doc in LibDocCreator(path, encoding).create():
+                writer.add_document(**doc)
+
+        for path in list_files(moduledirs, '.mod'):
+            for doc in ModDocCreator(path, encoding).create():
+                writer.add_document(**doc)
+
+        for path in list_files(moduledirs, '.kicad_mod'):
+            for doc in KicadModDocCreator(path, encoding).create():
+                writer.add_document(**doc)
+
         writer.commit()
         ix.close()

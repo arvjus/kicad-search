@@ -1,0 +1,70 @@
+
+kicadsearch/kicadsearch_parser.py,628
+class ParserException(10,92
+    def __init__(12,127
+class LibFileParser(19,426
+    def __init__(21,456
+    def parse(30,689
+class DcmFileParser(72,2410
+    def __init__(74,2440
+    def parse(82,2646
+class LibDocCreator(133,4637
+    def __init__(135,4667
+    def create(144,4992
+class ModFileParser(168,6096
+    def __init__(170,6126
+    def parse(179,6359
+class ModDocCreator(231,8495
+    def __init__(233,8525
+    def create(237,8624
+class KicadModFileParser(252,9238
+    def __init__(254,9273
+    def parse(260,9422
+class KicadModDocCreator(297,10816
+    def __init__(299,10851
+    def create(303,10950
+
+kicadsearch/kicadsearch_search.py,247
+class KicadSearcher(9,172
+    def __init__(11,202
+    def close(16,361
+    def print_index_statistics(19,413
+    def search(27,775
+    def list_all(44,1581
+    def print_meta(49,1784
+    def print_doc(67,2555
+        def dump_doc(68,2585
+
+kicadsearch/kicadsearch_config.py,110
+class ConfigException(8,93
+class KicadsrchConfig(12,138
+    def __init__(14,176
+    def dump_items(25,592
+
+kicadsearch/kicadsearch_index.py,104
+def list_files(11,249
+class KicadIndexer(20,547
+    def __init__(21,575
+    def create_index(24,613
+
+kicadsearch-index.py,60
+class IndexerArgumentParser(8,157
+    def __init__(11,292
+
+kicadsearch.py,87
+class SearchArgumentParser(8,168
+    def __init__(12,338
+    def parse_args(58,2420
+
+test/test_kicadsearch_parser.py,228
+def test_LibFileParser(9,229
+def test_DcmFileParser(15,419
+def test_LibDocCreator(21,609
+def test_ModFileParser(28,807
+def test_ModDocCreator(34,996
+def test_KicadModFileParser(41,1199
+def test_KicadModDocCreator(47,1413
+
+setup.py,0
+
+kicadsearch/__init__.py,0

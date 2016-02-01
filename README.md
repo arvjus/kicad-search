@@ -8,16 +8,11 @@ Copyright (c) 2016 Arvid Juskaitis
 
 features:
 
+ - support for schematic part library (*.lib, *.dcm)
+ - support for module libraries (*.kicad_mod) and 'legacy' format (*.mod)
  - flexible search queries
  - powered by whoosh
  - cli interface
-
-
-Development status
-------------------------
-
-Currently only schematic part library (*.lib, *.dcm) and 'legacy' module (*.mod) format are
-supported. Support for module libraries (*.kicad_mod) is under development.
 
 
 Quick Start

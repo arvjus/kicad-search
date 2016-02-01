@@ -3,16 +3,16 @@
 
 [default]
 # path to index directory
-indexdir = ./testdata/index
+indexdir = ./test/data/index
 
 [index]
 # encoding in *.lib
 encoding = latin1
 
 # colon-separated list of library directories
-librarydirs = ./testdata/library/*.lib
+librarydirs = ./test/data/library
 
 # colon-separated list of module directories
-moduledirs = ./testdata/library/*.mod
+moduledirs = ./test/data/library
 
 [search]

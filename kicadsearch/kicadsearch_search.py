@@ -2,7 +2,7 @@
 
 import sys
 from whoosh import index
-from whoosh.query import Every, And, Term
+from whoosh.query import Every
 from whoosh.qparser import QueryParser, MultifieldParser, FieldAliasPlugin, OrGroup
 
 

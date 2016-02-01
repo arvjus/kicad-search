@@ -5,7 +5,6 @@ import sys
 from argparse import ArgumentParser, RawTextHelpFormatter
 from kicadsearch import KicadsrchConfig, KicadSearcher
 
-
 class SearchArgumentParser(ArgumentParser):
     """Freetext searching in KiCad EDA component libraries\n
 Search in t[ype], n[ame](default), k[eyword], d[escr] fields"""
@@ -48,7 +47,7 @@ Search in t[ype], n[ame](default), k[eyword], d[escr] fields"""
         self.add_argument('-t',
                           '--type',
                           dest='search_type',
-                          choices=['lib', 'mod'],
+                          choices=['lib', 'mod', 'kmod'],
                           help='restrict search by a given type')
         self.add_argument('-d',
                           '--dump',
@@ -90,4 +89,3 @@ if __name__ == '__main__':
     finally:
         if ks:
             ks.close()
-

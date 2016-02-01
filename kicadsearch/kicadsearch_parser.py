@@ -163,7 +163,7 @@ class LibDocCreator(object):
 
 
 ###############################################################################
-# Footprint library
+# Footprint library .mod
 ###############################################################################
 class ModFileParser(object):
 
@@ -246,11 +246,73 @@ class ModDocCreator(object):
                 yield item
 
 
+###############################################################################
+# Footprint library .kicad_mod
+###############################################################################
+class KicadModFileParser(object):
+
+    def __init__(self, path, encoding):
+        self.path = path
+        self.encoding = encoding
+        self.md5sum = None
+        self.item = {}
+
+    def parse(self):
+        if not os.path.isfile(self.path):
+            return None
+
+        with open(self.path, 'r', encoding=self.encoding) as f:
+            try:
+                for line in iter(f.readline, ''):
+                    while True:
+                        m = re.search('\(module\s+(\S+).*', line)
+                        if m:
+                            self.item = {
+                                'name': m.group(1).lower(),
+                                'position': 0,
+                                'lineno': 0,
+                                'lines': 0,
+                            }
+                            self.md5sum = hashlib.md5()
+                            break
+
+                        m = re.search('\(descr\s+"*([^"\)]+)"*\)', line)
+                        if m:
+                            self.item['descr'] = m.group(1).lower()
+                            break
+
+                        m = re.search('\(tags\s+"*([^"\)]+)"*\)', line)
+                        if m:
+                            self.item['keyword'] = m.group(1).lower()
+                        break
+                    self.item['lines'] += 1
+                    self.md5sum.update(line.encode(self.encoding))
+
+                self.item['md5sum'] = self.md5sum.hexdigest()
+                yield self.item
+            except Exception as ex:
+                print('Error:', ex)
+
+
+class KicadModDocCreator(object):
+
+    def __init__(self, path, encoding):
+        self.path = path
+        self.encoding = encoding
+
+    def create(self):
+        for lib_item in KicadModFileParser(self.path, self.encoding).parse():
+            item = lib_item.copy()
+            item['id'] = '{}#{}'.format(self.path, item['name'])
+            item['type'] = 'KMOD'
+            item['path'] = self.path
+            yield item
+
 if __name__ == '__main__':
-    for f in glob.glob(r'../testdata/library/*.mod'):
-        for doc in ModDocCreator(f, 'latin1').create():
+    for f in glob.glob(r'../test/data/library/arduino.pretty/*.kicad_mod'):
+        for doc in KicadModFileParser(f, 'latin1').parse():
             print('doc:', doc)
 
-    # for f in glob.glob(r'../testdata/library/*.mod'):
-    #     for doc in ModFileParser(f, 'latin1').parse():
-    #         print('doc:', doc)
+    for f in glob.glob(r'../test/data/library/arduino.pretty/*.kicad_mod'):
+        for doc in KicadModDocCreator(f, 'latin1').create():
+            print('doc:', doc)
