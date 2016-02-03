@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import glob
 from kicadsearch import LibFileParser, DcmFileParser, LibDocCreator
@@ -42,7 +43,7 @@ def test_KicadModFileParser():
     docs = []
     for f in glob.glob(r'./test/data/library/*.pretty/*.kicad_mod'):
         docs += [doc for doc in KicadModFileParser(f, 'latin1').parse()]
-    assert len(docs) == 0
+    assert len(docs) == 1
 
 def test_KicadModDocCreator():
     docs = []

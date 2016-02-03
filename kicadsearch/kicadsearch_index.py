@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 import os
 import os.path
@@ -57,4 +58,8 @@ class KicadIndexer(object):
                 writer.add_document(**doc)
 
         writer.commit()
+        searcher = ix.searcher()
+        count = searcher.doc_count()
+        searcher.close()
         ix.close()
+        return count

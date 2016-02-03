@@ -29,11 +29,12 @@ if __name__ == '__main__':
         if args.dump_config:
             config.dump_items('default', 'index')
         elif args.create_index:
-            ki.create_index(
+            count = ki.create_index(
                 config.get('default', 'indexdir'),
                 config.get('index', 'librarydirs').split(':'),
                 config.get('index', 'moduledirs').split(':'),
                 config.get('index', 'encoding'))
+            print('Total number of documents:', count)
         elif args.reset_index:
             ki.create_index(config.get('default', 'indexdir'), [])
         else:

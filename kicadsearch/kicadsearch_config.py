@@ -27,8 +27,3 @@ class KicadsrchConfig(ConfigParser):
             print('section {}:'.format(sec))
             for kv in self.items(sec):
                 print('  {} = {}'.format(*kv))
-
-
-if __name__ == '__main__':
-    config = KicadsrchConfig(None)
-    config.dump_items('default', 'index', 'search')

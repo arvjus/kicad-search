@@ -4,7 +4,6 @@
 import os
 import re
 import hashlib
-import glob
 
 
 class ParserException(Exception):
@@ -270,7 +269,7 @@ class KicadModFileParser(object):
                             self.item = {
                                 'name': m.group(1).lower(),
                                 'position': 0,
-                                'lineno': 0,
+                                'lineno': 1,
                                 'lines': 0,
                             }
                             self.md5sum = hashlib.md5()
@@ -307,12 +306,3 @@ class KicadModDocCreator(object):
             item['type'] = 'KMOD'
             item['path'] = self.path
             yield item
-
-if __name__ == '__main__':
-    for f in glob.glob(r'../test/data/library/arduino.pretty/*.kicad_mod'):
-        for doc in KicadModFileParser(f, 'latin1').parse():
-            print('doc:', doc)
-
-    for f in glob.glob(r'../test/data/library/arduino.pretty/*.kicad_mod'):
-        for doc in KicadModDocCreator(f, 'latin1').create():
-            print('doc:', doc)

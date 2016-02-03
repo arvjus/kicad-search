@@ -1,9 +1,10 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 
 from setuptools import setup
 
 setup(name='kicadsearch',
-      version='0.3.0',
+      version='0.3.1',
       author='Arvid Juskaitis',
       author_email='arvydas.juskaitis@gmail.com',
       url='https://github.com/arvjus/kicad-search',
